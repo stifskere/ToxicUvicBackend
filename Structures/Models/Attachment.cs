@@ -1,11 +1,11 @@
+
 namespace ToxicUvicBackend.Structures.Models;
 
 public class Attachment
 {
-    public int Id { get; set; }
-    public string Path { get; set; }
+    public long Id { get; set; }
+    public long PostId { get; set; }
+    public string Path { get; set; } = default!;
     
-    public int PostId { get; set; }
-    
-    public Post Post { get; set; }
+    public Post? Post { get; set; }
 }

@@ -1,11 +1,19 @@
+
 namespace ToxicUvicBackend.Structures.Models;
 
 public class FeedBack
 {
-    public int Id { get; set; }
-    public int PostId { get; set; }
-    public int UpVotes { get; set; }
-    public int DownVotes { get; set; }
+    public long Id { get; set; }
+    public long PostId { get; set; }
+    public VoteType VoteType { get; set; }
+    public string IpAddress { get; set; } = default!;
+    public DateTime SentAt { get; set; } = default!;
     
-    public Post Post { get; set; }
+    public Post? Post { get; set; }
+}
+
+public enum VoteType
+{
+    UpVote = 1,
+    DownVote = 2
 }

@@ -10,10 +10,18 @@
 
     <ItemGroup>
       <PackageReference Include="Insight.Database" Version="6.3.11" />
+      <PackageReference Include="Insight.Database.Providers.MySql" Version="6.3.11" />
       <PackageReference Include="MemwLib" Version="2.2.0" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0-preview.1.24080.9" />
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0-preview.1.24080.9" />
+      <PackageReference Include="MySql.Data" Version="8.3.0" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update=".env">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>
