@@ -54,7 +54,7 @@ internal static class Program
         builder.Services
             .AddSingleton(server)
             .AddSingleton(env)
-            .AddSingleton(connection.As<IPostRepository>())
+            .AddSingleton(connection)
             .AddHostedService<ServerService>();
 
         return builder.Build();

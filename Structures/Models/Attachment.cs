@@ -1,11 +1,15 @@
+using Insight.Database;
 
 namespace ToxicUvicBackend.Structures.Models;
 
 public class Attachment
 {
-    public long Id { get; set; }
-    public long PostId { get; set; }
-    public string Path { get; set; } = default!;
+    [System.ComponentModel.DataAnnotations.Schema.Column("attachment_id")]
+    public long Id { get; set; } // id INTEGER PRIMARY_KEY AUTO_INCREMENT
     
-    public Post? Post { get; set; }
+    [System.ComponentModel.DataAnnotations.Schema.Column("attachment_post_id")]
+    public long PostId { get; set; } // post_id INTEGER REFERENCES posts(id)
+    
+    [System.ComponentModel.DataAnnotations.Schema.Column("attachment_path")] // path VARCHAR(256) NOT NULL
+    public string Path { get; set; } = default!;
 }
