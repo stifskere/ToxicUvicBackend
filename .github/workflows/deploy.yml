@@ -1,4 +1,3 @@
-#file: noinspection YAMLSchemaValidation
 name: Publish Docker image
 
 on:
@@ -20,6 +19,11 @@ jobs:
           tags: ${{ github.sha }}
           containerfiles: |
             ./Dockerfile
+          build-args: |
+            MYSQL_SERVER=${{ secrets.MYSQL_SERVER }}
+            MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}
+            MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }}
+            MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}
         
       - name: Push to toxic uvic registry
         id: push-to-toxicuvic
@@ -30,11 +34,6 @@ jobs:
           registry: ${{ secrets.ACR_REGISTRY_NAME }}
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
-          extra-args:
-            MYSQL_SERVER: ${{ secrets.MYSQL_SERVER }}
-            MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
-            MYSQL_USERNAME: ${{ secrets.MYSQL_USERNAME }}
-            MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
             
       - name: Print image url
         run: echo "Image pushed to ${{ steps.push-to-toxicuvic.outputs.registry-paths }}"
