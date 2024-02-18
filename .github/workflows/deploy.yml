@@ -30,7 +30,7 @@ jobs:
           registry: ${{ secrets.ACR_REGISTRY_NAME }}
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
-          extra-args: |
+          extra-args:
             MYSQL_SERVER: ${{ secrets.MYSQL_SERVER }}
             MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
             MYSQL_USERNAME: ${{ secrets.MYSQL_USERNAME }}
