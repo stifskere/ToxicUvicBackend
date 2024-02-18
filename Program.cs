@@ -1,15 +1,11 @@
-﻿
-using Insight.Database;
-using Insight.Database.Providers;
-using Insight.Database.Providers.MySql;
-using MemwLib.Data.EnvironmentVariables;
+﻿using MemwLib.Data.EnvironmentVariables;
 using MemwLib.Http;
 using MemwLib.Http.Types;
 using MemwLib.Http.Types.Configuration;
 using MemwLib.Http.Types.SSL;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using MySql.Data.MySqlClient;
 using ToxicUvicBackend.Services;
 using ToxicUvicBackend.Structures;
 
@@ -41,20 +37,30 @@ internal static class Program
             .AddVariablesFrom(File.Open("./.env", FileMode.Open), true)
             .ToType<EnvConfig>(true);
         
-        InsightDbProvider.RegisterProvider(new MySqlInsightDbProvider());
-        
-        MySqlConnection connection = new(
-            $"Server={env.DatabaseHostName};Database={env.DatabaseName};Uid={env.DatabaseUsername};Pwd={env.DatabasePassword}"
-        );
-        
-        connection.Open();
-        
         HostApplicationBuilder builder = new();
 
         builder.Services
             .AddSingleton(server)
             .AddSingleton(env)
-            .AddSingleton(connection)
+            .AddDbContext<DatabaseContext>(dbContextBuilder =>
+            {
+                string connectionString
+                    = $"Server={env.DatabaseHostName};Database={env.DatabaseName};Uid={env.DatabaseUsername};Pwd={env.DatabasePassword}";
+                
+                dbContextBuilder.UseMySql(connectionString,
+                    ServerVersion.AutoDetect(connectionString),
+                    options =>
+                    {
+                        options.EnableRetryOnFailure(
+                            maxRetryCount: 5,
+                            maxRetryDelay: TimeSpan.FromSeconds(30),
+                            errorNumbersToAdd: null
+                        );
+
+                        options.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                    }
+                );
+            })
             .AddHostedService<ServerService>();
 
         return builder.Build();

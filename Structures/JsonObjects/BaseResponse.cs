@@ -14,4 +14,11 @@ public class BaseResponse<TContent>
             Success = false,
             Content = error
         });
+
+    public static JsonBody<BaseResponse<T>> MakeSuccessResponse<T>(T content)
+        => new(new BaseResponse<T>
+        {
+            Success = true,
+            Content = content
+        });
 }

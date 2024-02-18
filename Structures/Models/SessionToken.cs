@@ -1,18 +1,36 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ToxicUvicBackend.Structures.Models;
 
+[Table("session_tokens")]
 public class SessionToken
 {
-    [Column("session_token_id")] 
-    public int Id { get; set; } // id INTEGER PRIMARY KEY AUTO_INCREMENT
+    [Column("id"), Key] 
+    public long Id { get; init; } // id INTEGER PRIMARY KEY AUTO_INCREMENT
 
-    [Column("session_token")] 
-    public string Token { get; set; } = default!; // token VARCHAR(30) NOT NULL
+    [Column("token"), MaxLength(30), Required] 
+    public string Token { get; init; } = default!; // token VARCHAR(30) NOT NULL
     
-    [Column("session_token_created_at")] 
-    public DateTime CreatedAt { get; set; } // created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    [Column("created_at"), DatabaseGenerated(DatabaseGeneratedOption.Computed)] 
+    public DateTime CreatedAt { get; init; } // created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
     
-    [Column("session_token_expires_at")] 
-    public DateTime ExpiresAt { get; set; } // expires_at TIMESTAMP NOT NULL DEFAULT (CURRENT_TIMESTAMP + INTERVAL 1 WEEK)
+    [Column("expires_at"), DatabaseGenerated(DatabaseGeneratedOption.Computed)] 
+    public DateTime ExpiresAt { get; init; } // expires_at TIMESTAMP NOT NULL DEFAULT (CURRENT_TIMESTAMP + INTERVAL 1 WEEK)
+
+    public static bool operator ==(SessionToken left, SessionToken right) 
+        => left.Token == right.Token;
+
+    public static bool operator !=(SessionToken left, SessionToken right) 
+        => left.Token != right.Token;
+    
+    protected bool Equals(SessionToken other) 
+        => Token == other.Token;
+
+    public override bool Equals(object? obj) 
+        => !ReferenceEquals(null, obj) &&
+           (ReferenceEquals(this, obj) || obj.GetType() == GetType() && Equals((SessionToken)obj));
+
+    public override int GetHashCode() 
+        => HashCode.Combine(Id, Token, CreatedAt, ExpiresAt);
 }

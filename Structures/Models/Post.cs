@@ -1,33 +1,32 @@
-
-using Insight.Database;
-using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ToxicUvicBackend.Structures.Models;
 
+[Table("posts")]
 public class Post
 {
-    [JsonProperty("id"), Column("post_id")]
-    public long Id { get; set; } // id INTEGER PRIMARY KEY AUTO_INCREMENT
+    // actual table columns
+    [Column("id"), Key]
+    public long Id { get; init; } // id INTEGER PRIMARY KEY AUTO_INCREMENT
     
-    [JsonProperty("by"), Column("post_session_token_id")]
-    public long SessionTokenId { get; set; } // session_token INTEGER REFERENCES session_tokens(id)
+    [Column("message"), MaxLength(300), Required]
+    public string Message { get; init; } = default!; // message VARCHAR(300) NOT NULL
     
-    [JsonProperty("message"), Column("post_message")]
-    public string Message { get; set; } = default!; // message VARCHAR(300) NOT NULL
+    [Column("category"), MaxLength(79)] 
+    public string Categories { get; init; } = default!; // category VARCHAR(15)
     
-    [JsonProperty("category"), Column("post_category")] 
-    public string Category { get; set; } = default!; // category VARCHAR(15)
+    [Column("created_at"), DatabaseGenerated(DatabaseGeneratedOption.Computed)] 
+    public DateTime CreatedAt { get; init; } // created_at NOT NULL DEFAULT CURRENT_TIMESTAMP
     
-    [JsonProperty("created_at"), Column("post_created_at")] 
-    public DateTime CreatedAt { get; set; } // created_at NOT NULL DEFAULT CURRENT_TIMESTAMP
+    [Column("session_token_id")]
+    public long SessionTokenId { get; init; } // session_token INTEGER REFERENCES session_tokens(id)
 
+    // literal relation sub-objects
+    [ForeignKey(nameof(SessionTokenId))]
+    public SessionToken SessionToken { get; init; } = default!;
     
-    [JsonIgnore, ChildRecords] 
-    public SessionToken SessionToken { get; set; } = default!;
+    public ICollection<Feedback> FeedBacks { get; init; } = default!;
     
-    [JsonIgnore, ChildRecords]
-    public List<FeedBack> Feedback { get; set; } = [];
-    
-    [JsonProperty("attachments"), ChildRecords] 
-    public List<Attachment> Attachments { get; set; } = [];
+    public ICollection<Attachment> Attachments { get; init; } = default!;
 }

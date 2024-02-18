@@ -1,40 +1,46 @@
-using Insight.Database;
 using JetBrains.Annotations;
 using MemwLib.Http.Types;
 using MemwLib.Http.Types.Attributes;
 using MemwLib.Http.Types.Entities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using MySql.Data.MySqlClient;
 using ToxicUvicBackend.Structures;
 using ToxicUvicBackend.Structures.JsonObjects;
+using ToxicUvicBackend.Structures.JsonObjects.DataStructures;
 using ToxicUvicBackend.Structures.Models;
 
 namespace ToxicUvicBackend.Routes;
 
 [RouteGroup("/feed"), UsedImplicitly]
-[UsesMiddleware(typeof(Middleware), nameof(Middleware.TokenCheckerMiddleware))]
+[UsesMiddleware(typeof(Tokens), nameof(Tokens.TokenCheckerMiddleware))]
 public class Feed
 {
-    private static readonly MySqlConnection Connection =
-        Program.Services.GetRequiredService<MySqlConnection>();
+    private static readonly DatabaseContext Connection =
+        Program.Services.GetRequiredService<DatabaseContext>();
     
-    [GroupMember(RequestMethodType.Get, "/length"), UsedImplicitly]
+    [GroupMember(RequestMethodType.Get, "/length/?", true), UsedImplicitly]
     public static ResponseEntity GetLength(RequestEntity request)
     {
-        long count = Connection.Query<long>(
-            "GetInsightPostCount", 
-            new { Category = request.Path.Parameters["category"] }
-        ).First();
+        string? query = request.Path.Parameters["query"];
+        string[]? categories = request.Path.Parameters["categories"]?
+            .Split(',')
+            .Select(c => c.Trim())
+            .ToArray();
         
-        BaseResponse<CountResponse> response = new()
-        {
-            Success = true,
-            Content = new CountResponse(count)
-        }; 
+        IEnumerable<Post> result = Connection.Posts
+            .AsEnumerable()
+            .Where(p => categories == null || p.Categories.Split(',').Any(c => categories.Contains(c.Trim())))
+            .Where(p => query == null || p.Message.Contains(query));
         
         return new ResponseEntity(
             ResponseCodes.Ok, 
-            new JsonBody<BaseResponse<CountResponse>>(response)
+            new JsonBody<BaseResponse<CountResponse>>(
+                new BaseResponse<CountResponse>
+                {
+                    Success = true,
+                    Content = new CountResponse(result.Count())
+                }
+            )
         );
     }
 
@@ -46,43 +52,36 @@ public class Feed
         {
             return new ResponseEntity(
                 ResponseCodes.BadRequest,
-                BaseResponse<string>.MakeErrorResponse("'from' or 'to' properties are missing, request count first.")
+                BaseResponse<string>
+                    .MakeErrorResponse("'from' or 'to' properties are missing, request count first.")
             );
         }
 
-        List<Post> posts = Connection.Query(
-            "GetInsightPosts",
-            new { LFrom = from, LTo = to },
-            Query.Returns(Some<Post>.Records)
-                .ThenChildren(Some<FeedBack>.Records)
-                .ThenChildren(Some<Attachment>.Records)
-                .ThenChildren(OneToOne<SessionToken>.Records)
-        ).ToList();
-
-        return new ResponseEntity(ResponseCodes.Ok, new JsonBody<List<Post>>(posts));
-
-        // if (request.Path.Parameters.Contains("category"))
-        // {
-        //     posts = posts
-        //         .Where(p => p.Category == request.Path.Parameters["category"])
-        //         .ToList();
-        // }
-        //
-        // if (to - from >= posts.Count)
-        // {
-        //     return new ResponseEntity(
-        //         ResponseCodes.BadRequest,
-        //         BaseResponse<string>.MakeErrorResponse("'from' to 'to' range is out of range, request count first.")
-        //     );
-        // }
-        //
-        // return new ResponseEntity(
-        //     ResponseCodes.Ok, 
-        //     new JsonBody<BaseResponse<List<PostResponse>>>(new BaseResponse<List<PostResponse>>
-        //     {
-        //         Success = true,
-        //         Content = posts
-        //     })
-        // );
+        string? query = request.Path.Parameters["query"];
+        SessionToken token = (SessionToken)request.SessionParameters["Token"];
+        string[]? categories = request.Path.Parameters["categories"]?
+            .Split(',')
+            .Select(c => c.Trim())
+            .ToArray();
+        
+        List<PublicPost> posts = Connection.Posts
+            .Include(p => p.SessionToken)
+            .Include(p => p.Attachments) 
+            .Include(p => p.FeedBacks)
+            .ThenInclude(f => f.SessionToken)
+            .OrderByDescending(p => p.CreatedAt)
+            .AsEnumerable()
+            .Where(p => categories == null || p.Categories.Split(',').Any(c => categories.Contains(c.Trim())))
+            .Where(p => query == null || p.Message.Contains(query))
+            .Skip(from)
+            .Take(to - from)
+            .Select(p => new PublicPost(p, token.Token))
+            .ToList();
+        
+        return new ResponseEntity(
+            ResponseCodes.Ok, 
+            BaseResponse<List<PublicPost>>
+                .MakeSuccessResponse(posts)
+        );
     }
 }
