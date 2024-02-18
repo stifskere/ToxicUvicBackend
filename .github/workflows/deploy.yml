@@ -22,8 +22,8 @@ jobs:
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
           tags: ${{ secrets.ACR_REGISTRY_NAME }}/ToxicUvicBackend/${{ github.sha }}
-          build-args:
-            MYSQL_SERVER: ${{ secrets.MYSQL_SERVER }}
-            MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
-            MYSQL_USERNAME: ${{ secrets.MYSQL_USERNAME }}
-            MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+        build-args:
+          MYSQL_SERVER: ${{ secrets.MYSQL_SERVER }}
+          MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+          MYSQL_USERNAME: ${{ secrets.MYSQL_USERNAME }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}

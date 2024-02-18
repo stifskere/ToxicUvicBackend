@@ -12,9 +12,6 @@
               <option name="patterns">
                 <list>
                   <Item>
-                    <option name="path" value=".github/actions/deploy.yml" />
-                  </Item>
-                  <Item>
                     <option name="path" value=".github/workflows/deploy.yml" />
                   </Item>
                 </list>
