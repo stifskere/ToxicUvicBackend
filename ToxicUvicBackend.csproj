@@ -23,6 +23,15 @@
       <None Update=".env">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Remove=".github\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove=".github\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove=".github\**" />
     </ItemGroup>
 
 </Project>

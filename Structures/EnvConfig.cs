@@ -15,7 +15,4 @@ public class EnvConfig
 
     [EnvironmentVariable("MYSQL_PASSWORD")]
     public string DatabasePassword { get; init; } = default!;
-
-    [EnvironmentVariable("HOST_NAME")]
-    public string HostName { get; init; } = default!;
 }

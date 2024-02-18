@@ -1,6 +1,5 @@
 ﻿using MemwLib.Data.EnvironmentVariables;
 using MemwLib.Http;
-using MemwLib.Http.Types;
 using MemwLib.Http.Types.Configuration;
 using MemwLib.Http.Types.SSL;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +7,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ToxicUvicBackend.Services;
 using ToxicUvicBackend.Structures;
+
+#if DEBUG
+using MemwLib.Http.Types;
+#endif
 
 namespace ToxicUvicBackend;
 
@@ -33,8 +36,12 @@ internal static class Program
 #endif
         });
 
+#if DEBUG
         EnvConfig env = new EnvContext()
             .AddVariablesFrom(File.Open("./.env", FileMode.Open), true)
+#else
+        EnvConfig env = new EnvContext(true)
+#endif
             .ToType<EnvConfig>(true);
         
         HostApplicationBuilder builder = new();

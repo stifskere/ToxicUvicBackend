@@ -16,7 +16,12 @@ ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "ToxicUvicBackend.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
-EXPOSE 10876
+EXPOSE 10001
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "ToxicUvicBackend.dll"]
+
+ENV MYSQL_SERVER=${MYSQL_SERVER}
+ENV MYSQL_DATABASE=${MYSQL_DATABASE}
+ENV MYSQL_USERNAME=${MYSQL_USERNAME}
+ENV MYSQL_PASSWORD=${MYSQL_PASSWORD}

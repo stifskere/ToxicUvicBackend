@@ -1,0 +1,29 @@
+#file: noinspection YAMLSchemaValidation
+name: Publish Docker image
+
+on:
+  push:
+    branches: [ main ]
+    
+jobs:
+  push:
+    name: Push Docker image to toxicuvic container registry
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+        
+      - name: Build and tag Docker image
+        uses: docker/build-action@v3
+        with:
+          context: .
+          file: Dockerfile
+          registry: ${{ secrets.ACR_REGISTRY_NAME }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+          tags: ${{ secrets.ACR_REGISTRY_NAME }}/ToxicUvicBackend/${{ github.sha }}
+          build-args:
+            MYSQL_SERVER: ${{ secrets.MYSQL_SERVER }}
+            MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+            MYSQL_USERNAME: ${{ secrets.MYSQL_USERNAME }}
+            MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
