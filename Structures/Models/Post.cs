@@ -22,6 +22,9 @@ public class Post
     [Column("session_token_id")]
     public long SessionTokenId { get; init; } // session_token INTEGER REFERENCES session_tokens(id)
 
+    [Column("username"), MaxLength(35), DatabaseGenerated(DatabaseGeneratedOption.Identity)] 
+    public string Username { get; init; } = default!; // username VARCHAR(35) NOT NULL DEFAULT 'Anonymous'
+
     // literal relation sub-objects
     [ForeignKey(nameof(SessionTokenId))]
     public SessionToken SessionToken { get; init; } = default!;
