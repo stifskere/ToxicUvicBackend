@@ -16,7 +16,7 @@ jobs:
         uses: redhat-actions/buildah-build@v2
         with:
           image: ToxicUvicBackend
-          tags: ${{ github.sha }}
+          tags: toxic-uvic-backend
           containerfiles: |
             ./Dockerfile
           build-args: |
