@@ -16,7 +16,7 @@ ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "ToxicUvicBackend.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
-EXPOSE 10001
+EXPOSE 80
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "ToxicUvicBackend.dll"]
