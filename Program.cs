@@ -30,7 +30,7 @@ internal static class Program
         HttpServer server = new(new HttpServerConfig
         {
             Port = 10001,
-            SslBehavior = SslBehavior.DoNotUseCertificateIfNotFound,
+            SslBehavior = SslBehavior.AlwaysFindAndUseCertificate,
 #if DEBUG
             ServerState = ServerStates.Development
 #endif
