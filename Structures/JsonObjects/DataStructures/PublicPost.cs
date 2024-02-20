@@ -12,6 +12,9 @@ public class PublicPost
     
     [JsonProperty("post_id")]
     public int Id { get; init; }
+
+    [JsonProperty("username")] 
+    public string Username { get; init; } = default!;
     
     [JsonProperty("categories")]
     public string[] Categories { get; init; }
@@ -31,6 +34,8 @@ public class PublicPost
     public PublicPost(Post post, string token)
     {
         Id = (int)post.Id;
+
+        Username = post.Username;
 
         Categories = post.Categories.Split(',');
 
