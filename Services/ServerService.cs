@@ -57,7 +57,11 @@ public partial class ServerService(HttpServer server, ILoggerFactory loggerFacto
             BaseResponse<string>.MakeErrorResponse("Internal server error, check logs")
         ));
 #endif
-
+        server.AddGroup<Feed>();
+        server.AddGroup<Tokens>();
+        server.AddGroup<Posts>();
+        server.AddGroup<Categories>();
+        
         server.AddEndpoint(RequestMethodType.Options, AllRoutesRegex(), 
             _ => {
                 ResponseEntity res = new(ResponseCodes.Ok);
@@ -66,11 +70,6 @@ public partial class ServerService(HttpServer server, ILoggerFactory loggerFacto
 
                 return res;
             });
-        
-        server.AddGroup<Feed>();
-        server.AddGroup<Tokens>();
-        server.AddGroup<Posts>();
-        server.AddGroup<Categories>();
         
         return Task.CompletedTask;
     }
