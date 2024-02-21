@@ -1,4 +1,6 @@
+using System.Text.RegularExpressions;
 using MemwLib.Http;
+using MemwLib.Http.Types;
 using MemwLib.Http.Types.Entities;
 using MemwLib.Http.Types.Logging;
 using Microsoft.Extensions.Hosting;
@@ -12,7 +14,7 @@ using ToxicUvicBackend.Structures;
 
 namespace ToxicUvicBackend.Services;
 
-public class ServerService(HttpServer server, ILoggerFactory loggerFactory) : BackgroundService
+public partial class ServerService(HttpServer server, ILoggerFactory loggerFactory) : BackgroundService
 {
     protected override Task ExecuteAsync(CancellationToken ct)
     {
@@ -55,6 +57,15 @@ public class ServerService(HttpServer server, ILoggerFactory loggerFactory) : Ba
             BaseResponse<string>.MakeErrorResponse("Internal server error, check logs")
         ));
 #endif
+
+        server.AddEndpoint(RequestMethodType.Options, AllRoutesRegex(), 
+            _ => {
+                ResponseEntity res = new(ResponseCodes.Ok);
+
+                res.Headers.Set("Access-Control-Allow-Origin", "*");
+
+                return res;
+            });
         
         server.AddGroup<Feed>();
         server.AddGroup<Tokens>();
@@ -70,4 +81,7 @@ public class ServerService(HttpServer server, ILoggerFactory loggerFactory) : Ba
         server.Dispose();
         return Task.CompletedTask;
     }
+
+    [GeneratedRegex(@"\/.", RegexOptions.Compiled)]
+    private static partial Regex AllRoutesRegex();
 }
