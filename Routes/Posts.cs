@@ -1,3 +1,4 @@
+using System.Globalization;
 using JetBrains.Annotations;
 using MemwLib.Http.Types;
 using MemwLib.Http.Types.Attributes;
@@ -18,16 +19,39 @@ public class Posts
 {
     private static readonly DatabaseContext Connection =
         Program.Services.GetRequiredService<DatabaseContext>();
+
+    private static readonly Dictionary<SessionToken, DateTime> PutPostRateLimits = new();
     
     [GroupMember(RequestMethodType.Put, "/?", true), UsedImplicitly]
     public static ResponseEntity PutNewPost(RequestEntity request)
     {
         RequestPost requestedPost;
         SessionToken token = (SessionToken)request.SessionParameters["Token"];
+
+        if (PutPostRateLimits.TryGetValue(token, out DateTime rateLimitUntil))
+        {
+            if (rateLimitUntil > DateTime.Now)
+            {
+                ResponseEntity response = new(
+                    // I forgot to put rate limit 429 on MemwLib skull.
+                    ResponseCodes.Forbidden,
+                    BaseResponse<string>.MakeErrorResponse("You got rate limited, try sending a new request again after: see Retry-After header")
+                );
+            
+                response.Headers.Set("Retry-After", rateLimitUntil.ToString(CultureInfo.InvariantCulture));
+            
+                return response;
+            }
+
+            PutPostRateLimits.Remove(token);
+        }
         
         try
         {
             requestedPost = request.Body.ReadAs<JsonBody<RequestPost>>()!.Content;
+
+            if (requestedPost is null)
+                throw new NullReferenceException();
         }
         catch
         {
@@ -92,6 +116,8 @@ public class Posts
         
         Connection.SaveChanges();
 
+        PutPostRateLimits.Add(token, DateTime.Now + TimeSpan.FromSeconds(30)); 
+        
         return new ResponseEntity(ResponseCodes.Created);
     }
 
@@ -118,7 +144,7 @@ public class Posts
             BaseResponse<Post>.MakeSuccessResponse(new PublicPost(post, ((SessionToken)request.SessionParameters["Token"]).Token))
         );
     }
-
+    
     [GroupMember(RequestMethodType.Put, @"/(?'post_id'[\d]+)/feedback/?", true), UsedImplicitly]
     public static ResponseEntity PutFeedback(RequestEntity request)
     {

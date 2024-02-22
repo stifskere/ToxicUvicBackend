@@ -11,8 +11,8 @@ public class RequestPost
     
     [JsonProperty("message"), UsedImplicitly] 
     public string Message { get; init; } = default!;
-
-    [JsonProperty("categories"), UsedImplicitly] 
+    
+    [JsonProperty("categories"), UsedImplicitly]
     public string[] Categories { get; init; } = [];
 
     [JsonProperty("attachments"), UsedImplicitly]
