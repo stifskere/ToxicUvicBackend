@@ -14,7 +14,7 @@ public class PublicPost
     public int Id { get; init; }
 
     [JsonProperty("username")] 
-    public string Username { get; init; } = default!;
+    public string Username { get; init; }
     
     [JsonProperty("categories")]
     public string[] Categories { get; init; }

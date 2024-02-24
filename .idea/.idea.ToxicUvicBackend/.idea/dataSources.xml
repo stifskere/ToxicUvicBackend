@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="@uvicnotes.mysql.database.azure.com" uuid="e77a21a7-ba4e-42eb-afc0-9cc01a7c6bc4">
+    <data-source source="LOCAL" name="@4.178.100.243" uuid="63d0787f-c297-4e2e-ab14-0cb2a2e65cd7">
       <driver-ref>mysql.8</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>com.mysql.cj.jdbc.Driver</jdbc-driver>
-      <jdbc-url>jdbc:mysql://uvicnotes.mysql.database.azure.com:3306</jdbc-url>
+      <jdbc-url>jdbc:mysql://4.178.100.243:3306</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
   </component>
