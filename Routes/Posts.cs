@@ -144,11 +144,34 @@ public class Posts
             BaseResponse<Post>.MakeSuccessResponse(new PublicPost(post, ((SessionToken)request.SessionParameters["Token"]).Token))
         );
     }
+
+    [GroupMember(RequestMethodType.Delete, @"/(?'post_id'[\d]+)/feedback/?", true), UsedImplicitly]
+    [UsesMiddleware(typeof(Posts), nameof(PostExistsMiddleware))]
+    public static ResponseEntity DeleteFeedback(RequestEntity request)
+    {
+        int postId = int.Parse(request.CapturedGroups["post_id"]);
+        Post post = request.SessionParameters.Get<Post>("Post")!;
+        SessionToken sessionToken = (SessionToken)request.SessionParameters["Token"];
+
+        if (post.FeedBacks.All(f => f.SessionToken != sessionToken))
+            return new ResponseEntity(
+                ResponseCodes.NotFound,
+                BaseResponse<string>.MakeErrorResponse("The current user has no feedback on this post.")
+            );
+
+        Connection.FeedBacks.RemoveRange(
+            Connection.FeedBacks.Where(f => f.SessionToken == sessionToken && f.PostId == postId)
+        );
+
+        return new ResponseEntity(ResponseCodes.NoContent);
+    }
     
     [GroupMember(RequestMethodType.Put, @"/(?'post_id'[\d]+)/feedback/?", true), UsedImplicitly]
+    [UsesMiddleware(typeof(Posts), nameof(PostExistsMiddleware))]
     public static ResponseEntity PutFeedback(RequestEntity request)
     {
         int postId = int.Parse(request.CapturedGroups["post_id"]);
+        Post post = request.SessionParameters.Get<Post>("Post")!;
         string? requestedVoteType = request.Path.Parameters["vote"];
         
         if (requestedVoteType is not ("1" or "2"))
@@ -157,18 +180,6 @@ public class Posts
                 BaseResponse<string>.MakeErrorResponse(
                     "A valid vote type was not found, a query parameter called vote must exist with the value 1 (up vote) or 2 (down vote)"
                 )
-            );
-        
-        Post? post = Connection.Posts
-            .Include(p => p.SessionToken)
-            .Include(p => p.FeedBacks)
-            .ThenInclude(f => f.SessionToken)
-            .FirstOrDefault(p => p.Id == postId);
-
-        if (post is null)
-            return new ResponseEntity(
-                ResponseCodes.NotFound,
-                BaseResponse<string>.MakeErrorResponse($"No post associated with the id '{postId}'")
             );
 
         SessionToken sessionToken = (SessionToken)request.SessionParameters["Token"];
@@ -212,5 +223,26 @@ public class Posts
         return new ResponseEntity(
             ResponseCodes.NoContent
         );
+    }
+    
+    public static IResponsible PostExistsMiddleware(RequestEntity request)
+    {
+        int postId = int.Parse(request.CapturedGroups["post_id"]);
+        
+        Post? post = Connection.Posts
+            .Include(p => p.SessionToken)
+            .Include(p => p.FeedBacks)
+            .ThenInclude(f => f.SessionToken)
+            .FirstOrDefault(p => p.Id == postId);
+
+        if (post is null)
+            return new ResponseEntity(
+                ResponseCodes.NotFound,
+                BaseResponse<string>.MakeErrorResponse($"No post associated with the id '{postId}'")
+            );
+        
+        request.SessionParameters.Set("Post", post);
+
+        return new NextMiddleWare();
     }
 }
