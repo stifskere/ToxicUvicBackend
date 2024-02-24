@@ -10,7 +10,7 @@ public class PublicPost
     private static readonly EnvConfig EnvConfig
         = Program.Services.GetRequiredService<EnvConfig>();
     
-    [JsonProperty("post_id")]
+    [JsonProperty("id")]
     public int Id { get; init; }
 
     [JsonProperty("username")] 
