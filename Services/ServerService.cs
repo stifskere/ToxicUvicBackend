@@ -41,6 +41,7 @@ public partial class ServerService(HttpServer server, ILoggerFactory loggerFacto
 
         server.AddResponseListener(ResponseCodes.NotFound, response =>
         {
+            response.Headers.Set("Access-Control-Allow-Origin", "*");
             
             if (response.Body.ContentType is not "application/json")
                 return new ResponseEntity(
@@ -50,6 +51,24 @@ public partial class ServerService(HttpServer server, ILoggerFactory loggerFacto
 
             return response;
         });
+
+        ResponseCodes[] corsResponseCodes =
+        [
+            ResponseCodes.Ok, 
+            ResponseCodes.Created, 
+            ResponseCodes.NoContent, 
+            ResponseCodes.Forbidden,
+            ResponseCodes.Unauthorized
+        ];
+        
+        foreach (ResponseCodes responseCode in corsResponseCodes)
+        {
+            server.AddResponseListener(responseCode, response =>
+            {
+                response.Headers.Set("Access-Control-Allow-Origin", "*");
+                return response;
+            });
+        }
 
 #if !DEBUG
         server.AddResponseListener(ResponseCodes.InternalServerError, _ => new ResponseEntity(
@@ -62,15 +81,6 @@ public partial class ServerService(HttpServer server, ILoggerFactory loggerFacto
         server.AddGroup<Posts>();
         server.AddGroup<Categories>();
         
-        server.AddEndpoint(RequestMethodType.Options, AllRoutesRegex(), 
-            _ => {
-                ResponseEntity res = new(ResponseCodes.Ok);
-
-                res.Headers.Set("Access-Control-Allow-Origin", "*");
-
-                return res;
-            });
-        
         return Task.CompletedTask;
     }
     
@@ -80,7 +90,4 @@ public partial class ServerService(HttpServer server, ILoggerFactory loggerFacto
         server.Dispose();
         return Task.CompletedTask;
     }
-
-    [GeneratedRegex(@"\/.", RegexOptions.Compiled)]
-    private static partial Regex AllRoutesRegex();
 }
