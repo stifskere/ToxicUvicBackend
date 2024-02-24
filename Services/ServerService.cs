@@ -1,6 +1,4 @@
-using System.Text.RegularExpressions;
 using MemwLib.Http;
-using MemwLib.Http.Types;
 using MemwLib.Http.Types.Entities;
 using MemwLib.Http.Types.Logging;
 using Microsoft.Extensions.Hosting;
@@ -14,7 +12,7 @@ using ToxicUvicBackend.Structures;
 
 namespace ToxicUvicBackend.Services;
 
-public partial class ServerService(HttpServer server, ILoggerFactory loggerFactory) : BackgroundService
+public class ServerService(HttpServer server, ILoggerFactory loggerFactory) : BackgroundService
 {
     protected override Task ExecuteAsync(CancellationToken ct)
     {
