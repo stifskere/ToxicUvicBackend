@@ -1,4 +1,6 @@
+using System.Text.RegularExpressions;
 using MemwLib.Http;
+using MemwLib.Http.Types;
 using MemwLib.Http.Types.Entities;
 using MemwLib.Http.Types.Logging;
 using Microsoft.Extensions.Hosting;
@@ -78,6 +80,15 @@ public class ServerService(HttpServer server, ILoggerFactory loggerFactory) : Ba
         server.AddGroup<Tokens>();
         server.AddGroup<Posts>();
         server.AddGroup<Categories>();
+
+        server.AddEndpoint(RequestMethodType.Options, new Regex(@"\/.+"), _ =>
+        {
+            ResponseEntity response = new(ResponseCodes.Ok);
+
+            response.Headers.Set("Access-Control-Allow-Origin", "*");
+
+            return response;
+        });
         
         return Task.CompletedTask;
     }
