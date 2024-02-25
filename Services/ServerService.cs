@@ -39,10 +39,8 @@ public class ServerService(HttpServer server, ILoggerFactory loggerFactory) : Ba
             );
         };
 
-        server.AddResponseListener(ResponseCodes.NotFound, response =>
+        server.AddResponseListener(ResponseCodes.NotFound, (_, response) =>
         {
-            response.Headers.Set("Access-Control-Allow-Origin", "*");
-            
             if (response.Body.ContentType is not "application/json")
                 return new ResponseEntity(
                     ResponseCodes.NotFound,
@@ -51,24 +49,6 @@ public class ServerService(HttpServer server, ILoggerFactory loggerFactory) : Ba
 
             return response;
         });
-
-        ResponseCodes[] corsResponseCodes =
-        [
-            ResponseCodes.Ok, 
-            ResponseCodes.Created, 
-            ResponseCodes.NoContent, 
-            ResponseCodes.Forbidden,
-            ResponseCodes.Unauthorized
-        ];
-        
-        foreach (ResponseCodes responseCode in corsResponseCodes)
-        {
-            server.AddResponseListener(responseCode, response =>
-            {
-                response.Headers.Set("Access-Control-Allow-Origin", "*");
-                return response;
-            });
-        }
 
 #if !DEBUG
         server.AddResponseListener(ResponseCodes.InternalServerError, _ => new ResponseEntity(
@@ -81,14 +61,9 @@ public class ServerService(HttpServer server, ILoggerFactory loggerFactory) : Ba
         server.AddGroup<Posts>();
         server.AddGroup<Categories>();
 
-        server.AddEndpoint(RequestMethodType.Options, new Regex(@"\/.+"), _ =>
-        {
-            ResponseEntity response = new(ResponseCodes.Ok);
-
-            response.Headers.Set("Access-Control-Allow-Origin", "*");
-
-            return response;
-        });
+        // cors shit
+        server.AddEndpoint(RequestMethodType.Options, new Regex(@"\/.+"), _ => new ResponseEntity(ResponseCodes.Ok));
+        server.AddGlobalMiddleware(_ => new NextMiddleWare().WithHeader("Access-Control-Allow-Origin", "*"));
         
         return Task.CompletedTask;
     }
