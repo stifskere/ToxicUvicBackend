@@ -62,7 +62,7 @@ public class ServerService(HttpServer server, ILoggerFactory loggerFactory) : Ba
         server.AddGroup<Categories>();
 
         // cors shit
-        server.AddEndpoint(RequestMethodType.Options, new Regex(@"\/.+"), _ => new ResponseEntity(ResponseCodes.Ok));
+        server.AddEndpoint(RequestMethodType.Options, new Regex(".+"), _ => new ResponseEntity(ResponseCodes.Ok));
         server.AddGlobalMiddleware(_ => new NextMiddleWare().WithHeader("Access-Control-Allow-Origin", "*"));
         
         return Task.CompletedTask;
