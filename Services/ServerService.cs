@@ -51,7 +51,7 @@ public class ServerService(HttpServer server, ILoggerFactory loggerFactory) : Ba
         });
 
 #if !DEBUG
-        server.AddResponseListener(ResponseCodes.InternalServerError, _ => new ResponseEntity(
+        server.AddResponseListener(ResponseCodes.InternalServerError, (_, _) => new ResponseEntity(
             ResponseCodes.InternalServerError,
             BaseResponse<string>.MakeErrorResponse("Internal server error, check logs")
         ));
