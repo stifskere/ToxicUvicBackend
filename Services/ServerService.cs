@@ -39,6 +39,9 @@ public class ServerService(HttpServer server, ILoggerFactory loggerFactory) : Ba
             );
         };
 
+        server.AddResponseListener(ResponseCodes.MethodNotAllowed, (request, _) 
+            => new ResponseEntity(ResponseCodes.NotFound, BaseResponse<string>.MakeErrorResponse($"{request.Path.Route} was not found.")));
+        
         server.AddResponseListener(ResponseCodes.NotFound, (_, response) =>
         {
             if (response.Body.ContentType is not "application/json")
