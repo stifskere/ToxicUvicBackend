@@ -64,7 +64,13 @@ public class ServerService(HttpServer server, ILoggerFactory loggerFactory) : Ba
         // cors shit
         server.AddEndpoint(RequestMethodType.Options, new Regex(".+"), _ => new ResponseEntity(ResponseCodes.Ok));
         server.AddGlobalMiddleware(_ => new NextMiddleWare()
-            .WithHeader("Access-Control-Allow-Origin", "https://toxicuvic.es")
+            .WithHeader("Access-Control-Allow-Origin", 
+#if DEBUG
+                "http://localhost:8080"
+#else
+                "https://toxicuvic.es"
+#endif  
+            )
             .WithHeader("Access-Control-Allow-Headers", "*")
         );
         
