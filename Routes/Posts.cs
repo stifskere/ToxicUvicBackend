@@ -159,10 +159,12 @@ public class Posts
                 BaseResponse<string>.MakeErrorResponse("The current user has no feedback on this post.")
             );
 
-        Connection.FeedBacks.RemoveRange(
-            Connection.FeedBacks.Where(f => f.SessionToken == sessionToken && f.PostId == postId)
+        Connection.FeedBacks.Remove(
+            Connection.FeedBacks.First(f => f.SessionToken == sessionToken && f.PostId == postId)
         );
 
+        Connection.SaveChanges();
+        
         return new ResponseEntity(ResponseCodes.NoContent);
     }
     

@@ -65,7 +65,16 @@ public class ServerService(HttpServer server, ILoggerFactory loggerFactory) : Ba
         server.AddGroup<Categories>();
 
         // cors shit
-        server.AddEndpoint(RequestMethodType.Options, new Regex(".+"), _ => new ResponseEntity(ResponseCodes.Ok));
+        server.AddEndpoint(RequestMethodType.Options, new Regex(".+"), request =>
+            {
+                if (!request.Headers.Contains("Access-Control-Request-Method"))
+                    return new ResponseEntity(ResponseCodes.NotAcceptable);
+
+                return new ResponseEntity(ResponseCodes.Ok)
+                    .WithHeader("Access-Control-Allow-Methods", request.Headers["Access-Control-Request-Method"]!);
+            }
+        );
+        
         server.AddGlobalMiddleware(_ => new NextMiddleWare()
             .WithHeader("Access-Control-Allow-Origin", 
 #if DEBUG
@@ -74,7 +83,7 @@ public class ServerService(HttpServer server, ILoggerFactory loggerFactory) : Ba
                 "https://toxicuvic.es"
 #endif  
             )
-            .WithHeader("Access-Control-Allow-Headers", "*")
+            .WithHeader("Access-Control-Allow-Headers", "Authorization")
         );
         
         return Task.CompletedTask;
